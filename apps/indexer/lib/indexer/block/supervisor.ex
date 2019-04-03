@@ -4,7 +4,7 @@ defmodule Indexer.Block.Supervisor do
   """
 
   alias Indexer.Block
-  alias Indexer.Block.{Catchup, Realtime, Reward, Uncle}
+  alias Indexer.Block.{Catchup, Realtime, Uncle}
   alias Indexer.Temporary.{AddressesWithoutCode, FailedCreatedAddresses}
 
   use Supervisor
@@ -56,11 +56,6 @@ defmodule Indexer.Block.Supervisor do
            [name: Realtime.Supervisor]
          ]},
         {Uncle.Supervisor, [[block_fetcher: block_fetcher, memory_monitor: memory_monitor], [name: Uncle.Supervisor]]},
-        {Reward.Supervisor,
-         [
-           [json_rpc_named_arguments: json_rpc_named_arguments, memory_monitor: memory_monitor],
-           [name: Reward.Supervisor]
-         ]},
         {FailedCreatedAddresses.Supervisor,
          [
            json_rpc_named_arguments,

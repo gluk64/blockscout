@@ -11,10 +11,11 @@ defmodule Indexer.Block.Fetcher do
 
   alias EthereumJSONRPC.{Blocks, FetchedBeneficiaries}
   alias Explorer.Chain.{Address, Block, Hash, Import, Transaction}
-  alias Indexer.{AddressExtraction, CoinBalance, MintTransfer, ReplacedTransaction, Token, TokenTransfers, Tracer}
-  alias Indexer.Address.{CoinBalances, TokenBalances}
   alias Indexer.Block.Fetcher.Receipts
-  alias Indexer.Block.{Reward, Transform}
+  alias Indexer.Block.Transform
+  alias Indexer.{CoinBalance, Token, Tracer}
+  alias Indexer.Fetcher.{BlockReward, ReplacedTransaction}
+  alias Indexer.Transform.{AddressCoinBalances, Addresses, AddressTokenBalances, MintTransfers, TokenTransfers}
 
   @type address_hash_to_fetched_balance_block_number :: %{String.t() => Block.block_number()}
 
@@ -107,11 +108,11 @@ defmodule Indexer.Block.Fetcher do
          %{logs: logs, receipts: receipts} = receipt_params,
          transactions_with_receipts = Receipts.put(transactions_params_without_receipts, receipts),
          %{token_transfers: token_transfers, tokens: tokens} = TokenTransfers.parse(logs),
-         %{mint_transfers: mint_transfers} = MintTransfer.parse(logs),
+         %{mint_transfers: mint_transfers} = MintTransfers.parse(logs),
          %FetchedBeneficiaries{params_set: beneficiary_params_set, errors: beneficiaries_errors} =
            fetch_beneficiaries(blocks, json_rpc_named_arguments),
          addresses =
-           AddressExtraction.extract_addresses(%{
+           Addresses.extract_addresses(%{
              block_reward_contract_beneficiaries: MapSet.to_list(beneficiary_params_set),
              blocks: blocks,
              logs: logs,
@@ -126,12 +127,12 @@ defmodule Indexer.Block.Fetcher do
              logs_params: logs,
              transactions_params: transactions_with_receipts
            }
-           |> CoinBalances.params_set(),
+           |> AddressCoinBalances.params_set(),
          beneficiaries_with_gas_payment <-
            beneficiary_params_set
            |> add_gas_payments(transactions_with_receipts)
-           |> Reward.Fetcher.reduce_uncle_rewards(),
-         address_token_balances = TokenBalances.params_set(%{token_transfers_params: token_transfers}),
+           |> BlockReward.reduce_uncle_rewards(),
+         address_token_balances = AddressTokenBalances.params_set(%{token_transfers_params: token_transfers}),
          {:ok, inserted} <-
            __MODULE__.import(
              state,
@@ -180,7 +181,7 @@ defmodule Indexer.Block.Fetcher do
   def async_import_block_rewards(errors) when is_list(errors) do
     errors
     |> block_reward_errors_to_block_numbers()
-    |> Indexer.Block.Reward.Fetcher.async_fetch()
+    |> BlockReward.async_fetch()
   end
 
   def async_import_coin_balances(%{addresses: addresses}, %{
@@ -221,7 +222,7 @@ defmodule Indexer.Block.Fetcher do
       %Transaction{block_hash: nil} ->
         []
     end)
-    |> ReplacedTransaction.Fetcher.async_fetch(10_000)
+    |> ReplacedTransaction.async_fetch(10_000)
   end
 
   def async_import_replaced_transactions(_), do: :ok

@@ -12,7 +12,8 @@ defmodule Indexer.Block.Uncle.Fetcher do
   alias EthereumJSONRPC.Blocks
   alias Explorer.Chain
   alias Explorer.Chain.Hash
-  alias Indexer.{AddressExtraction, Block, BufferedTask, Tracer}
+  alias Indexer.{Block, BufferedTask, Tracer}
+  alias Indexer.Transform.Addresses
 
   @behaviour Block.Fetcher
   @behaviour BufferedTask
@@ -108,7 +109,7 @@ defmodule Indexer.Block.Uncle.Fetcher do
          block_fetcher,
          original_entries
        ) do
-    addresses_params = AddressExtraction.extract_addresses(%{blocks: blocks_params, transactions: transactions_params})
+    addresses_params = Addresses.extract_addresses(%{blocks: blocks_params, transactions: transactions_params})
 
     case Block.Fetcher.import(block_fetcher, %{
            addresses: %{params: addresses_params},
@@ -150,10 +151,10 @@ defmodule Indexer.Block.Uncle.Fetcher do
            |> fork_transactions()
            |> Chain.import() do
       # * CoinBalance.Fetcher.async_fetch_balances is not called because uncles don't affect balances
-      # * InternalTransaction.Fetcher.async_fetch is not called because internal transactions are based on transaction
+      # * InternalTransaction.async_fetch is not called because internal transactions are based on transaction
       #   hash, which is shared with transaction on consensus blocks.
       # * Token.Fetcher.async_fetch is not called because the tokens only matter on consensus blocks
-      # * TokenBalance.Fetcher.async_fetch is not called because it uses block numbers from consensus, not uncles
+      # * TokenBalance.async_fetch is not called because it uses block numbers from consensus, not uncles
 
       block_second_degree_relations
       |> Enum.map(& &1.uncle_hash)

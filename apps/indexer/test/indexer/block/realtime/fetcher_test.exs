@@ -6,8 +6,9 @@ defmodule Indexer.Block.Realtime.FetcherTest do
 
   alias Explorer.Chain
   alias Explorer.Chain.{Address, Transaction}
-  alias Indexer.{Sequence, Token, TokenBalance, ReplacedTransaction}
+  alias Indexer.{Sequence, Token}
   alias Indexer.Block.{Realtime, Uncle}
+  alias Indexer.Fetcher.{ReplacedTransaction, TokenBalance}
 
   @moduletag capture_log: true
 

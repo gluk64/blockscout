@@ -12,7 +12,8 @@ defmodule Indexer.Temporary.AddressesWithoutCodeTest do
   alias Indexer.CoinBalance
   alias Indexer.Block.Fetcher
   alias Indexer.Block.Realtime.Fetcher, as: RealtimeFetcher
-  alias Indexer.{CoinBalance, Code, InternalTransaction, ReplacedTransaction, Token, TokenBalance}
+  alias Indexer.{CoinBalance, Token}
+  alias Indexer.Fetcher.{ContractCode, InternalTransaction, ReplacedTransaction, TokenBalance}
 
   @moduletag capture_log: true
 
@@ -23,7 +24,7 @@ defmodule Indexer.Temporary.AddressesWithoutCodeTest do
   describe "run/1" do
     setup %{json_rpc_named_arguments: json_rpc_named_arguments} do
       CoinBalance.Supervisor.Case.start_supervised!(json_rpc_named_arguments: json_rpc_named_arguments)
-      Code.Supervisor.Case.start_supervised!(json_rpc_named_arguments: json_rpc_named_arguments)
+      ContractCode.Supervisor.Case.start_supervised!(json_rpc_named_arguments: json_rpc_named_arguments)
       InternalTransaction.Supervisor.Case.start_supervised!(json_rpc_named_arguments: json_rpc_named_arguments)
       Token.Supervisor.Case.start_supervised!(json_rpc_named_arguments: json_rpc_named_arguments)
       TokenBalance.Supervisor.Case.start_supervised!(json_rpc_named_arguments: json_rpc_named_arguments)

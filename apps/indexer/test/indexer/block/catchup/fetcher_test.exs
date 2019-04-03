@@ -7,8 +7,9 @@ defmodule Indexer.Block.Catchup.FetcherTest do
 
   alias Explorer.Chain
   alias Explorer.Chain.Block.Reward
-  alias Indexer.{Block, CoinBalance, InternalTransaction, Token, TokenBalance}
+  alias Indexer.{Block, CoinBalance, Token}
   alias Indexer.Block.Catchup.Fetcher
+  alias Indexer.Fetcher.{BlockReward, InternalTransaction, TokenBalance}
 
   @moduletag capture_log: true
 
@@ -315,7 +316,7 @@ defmodule Indexer.Block.Catchup.FetcherTest do
           end
         end)
 
-      Process.register(pid, Indexer.Block.Reward.Fetcher)
+      Process.register(pid, BlockReward)
 
       assert %{first_block_number: ^block_number, missing_block_count: 1, shrunk: false} =
                Fetcher.task(%Fetcher{
@@ -414,7 +415,7 @@ defmodule Indexer.Block.Catchup.FetcherTest do
           end
         end)
 
-      Process.register(pid, Indexer.Block.Reward.Fetcher)
+      Process.register(pid, BlockReward)
 
       assert %{first_block_number: ^block_number, missing_block_count: 1, shrunk: false} =
                Fetcher.task(%Fetcher{
