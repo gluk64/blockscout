@@ -12,7 +12,7 @@ To connect it to your local environment you will have to configure it using [env
 
 Exmaple connecting to local `ganache` instance running on port `2000` on Mac/Windows:
 ```bash
-COIN=DAI \
+COIN=ETH \
 ETHEREUM_JSONRPC_VARIANT=ganache \ 
 ETHEREUM_JSONRPC_HTTP_URL=http://host.docker.internal:2000 \
 ETHEREUM_JSONRPC_WS_URL=ws://host.docker.internal:2000 \

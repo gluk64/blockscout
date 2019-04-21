@@ -1,7 +1,7 @@
 SYSTEM = $(shell uname -s)
 HOST = host.docker.internal
-DOCKER_IMAGE = blockscout_prod
-PG_CONTAINER_NAME = postgres
+DOCKER_IMAGE = gluk64/blockscout
+PG_CONTAINER_NAME = blockscout_postgres
 PG_CONTAINER_IMAGE = postgres:10.4
 THIS_FILE = $(lastword $(MAKEFILE_LIST))
 
@@ -58,7 +58,7 @@ endif
 
 migrate: build postgres
 	@echo "==> Running migrations"
-	@docker run --rm \
+	docker run --rm \
 					$(BLOCKSCOUT_CONTAINNER_PARAMS) \
 					$(DOCKER_IMAGE) /bin/sh -c "echo $$MIX_ENV && mix do ecto.drop --force, ecto.create, ecto.migrate"
 
@@ -87,7 +87,7 @@ endif
 
 start: build postgres 
 	@echo "==> Starting blockscout"
-	@docker run --rm \
+	docker run --rm \
 					$(BLOCKSCOUT_CONTAINNER_PARAMS) \
 					-p 4000:4000 \
 					$(DOCKER_IMAGE) /bin/sh -c "mix phx.server"
